@@ -171,7 +171,8 @@ Ejemplos de construcción en `iam_policies.tf`:
 ```hcl
 locals {
   state_bucket_arn       = "arn:aws:s3:::${var.state_bucket_name}"
-  state_kms_key_arn      = "arn:aws:kms:eu-west-1:${var.devops_account_id}:key/*"  # wildcard; se reemplaza por el ARN real post-apply
+  # KMS: no se construye un ARN de CMK como local; se usa Resource wildcard
+  # con condición kms:ResourceAliases en las políticas IAM (ver github_plan_policy_json)
   github_plan_role_arn   = "arn:aws:iam::${var.devops_account_id}:role/github-terraform-plan"
   github_apply_role_arn  = "arn:aws:iam::${var.devops_account_id}:role/github-terraform-apply"
 
@@ -480,7 +481,7 @@ run "p_iam_02_apply_role_no_workload_perms" {
     condition = !anytrue(flatten([
       for stmt in jsondecode(local.github_apply_policy_json).Statement : [
         for action in flatten([tolist(try(tolist(stmt.Action), [stmt.Action]))]) :
-        can(regex("^(ec2|ecs|rds|aurora|elasticloadbalancing|route53|bedrock|dynamodb):", action))
+        can(regex("^(ec2|ecs|rds|elasticloadbalancing|route53|bedrock|dynamodb|iam):", action))
       ]
     ]))
     error_message = "P-IAM-02: github-terraform-apply contiene acciones de servicios workload (ec2/ecs/rds/etc.)"
@@ -975,7 +976,7 @@ Las siguientes propiedades son verificables mediante `terraform test` con `mock_
 | P-S3-02 | `s3_tls_enforced` | `terraform test` (`run "p_s3_02_tls_enforced"` en `bootstrap_test.tftest.hcl`) + revisión de código. |
 | P-S3-03 | `s3_versioning_enabled` | Revisión de código: `aws_s3_bucket_versioning` con `status = "Enabled"`. |
 | P-IAM-01 | `plan_role_no_write_actions` | `terraform test` (`run "p_iam_01_plan_role_no_write_actions"`). |
-| P-IAM-02 | `apply_role_no_workload_perms` | `terraform test` (`run "p_iam_02_apply_role_no_workload_perms"`). |
+| P-IAM-02 | `apply_role_no_workload_perms` | `terraform test` (`run "p_iam_02_apply_role_no_workload_perms"`): ninguna acción en `github_apply_policy_json` empieza por `ec2:`, `ecs:`, `rds:`, `elasticloadbalancing:`, `route53:`, `bedrock:`, `dynamodb:` o `iam:`. |
 | P-IAM-03 | `plan_role_assumes_only_plan_roles` | `terraform test` (`run "p_iam_03_plan_role_assumes_only_plan_roles"`). |
 | P-IAM-04 | `apply_role_assumes_only_deploy_roles` | `terraform test` (`run "p_iam_04_apply_role_assumes_only_deploy_roles"`). |
 
