@@ -47,12 +47,12 @@ Establece los cimientos del repositorio de infraestructura: estructura de carpet
     - _Design: Componente 3.1 — Estructura de archivos_
   - **Verificación (tareas 3.1–3.5):** `terraform validate` en `infra/modules/kms/` termina con código de salida 0 y sin mensajes de error.
 
-- [ ] 4. Tests del módulo `kms`
-  - [~] 4.1 Crear `infra/modules/kms/tests/kms_test.tftest.hcl` con `mock_provider "aws" {}` al nivel raíz del archivo y el bloque `run "valid_key"` (`command = plan`): bloque `variables {}` con `description = "Test KMS key"`, `deletion_window_in_days = 10`, `alias_name = "alias/chatbot-test"`; tres `assert` que verifiquen `aws_kms_key.this.enable_key_rotation == true`, `aws_kms_key.this.deletion_window_in_days >= 7 && aws_kms_key.this.deletion_window_in_days <= 30` y `startswith(aws_kms_alias.this.name, "alias/")`
+- [x] 4. Tests del módulo `kms`
+  - [x] 4.1 Crear `infra/modules/kms/tests/kms_test.tftest.hcl` con `mock_provider "aws" {}` al nivel raíz del archivo y el bloque `run "valid_key"` (`command = plan`): bloque `variables {}` con `description = "Test KMS key"`, `deletion_window_in_days = 10`, `alias_name = "alias/chatbot-test"`; tres `assert` que verifiquen `aws_kms_key.this.enable_key_rotation == true`, `aws_kms_key.this.deletion_window_in_days >= 7 && aws_kms_key.this.deletion_window_in_days <= 30` y `startswith(aws_kms_alias.this.name, "alias/")`
     - _Requirements: 8.1, 8.2, 8.3, 8.4_
     - _Design: Componente 3.4 — run "valid_key"_
     - _Correctness Properties: P-KMS-01, P-KMS-02, P-KMS-03_
-  - [~] 4.2 Añadir al mismo archivo el bloque `run "invalid_window"` (`command = plan`): bloque `variables {}` con `deletion_window_in_days = 5` y `expect_failures = [var.deletion_window_in_days]`
+  - [x] 4.2 Añadir al mismo archivo el bloque `run "invalid_window"` (`command = plan`): bloque `variables {}` con `deletion_window_in_days = 5` y `expect_failures = [var.deletion_window_in_days]`
     - _Requirements: 8.5, 8.7_
     - _Design: Componente 3.4 — run "invalid_window"_
   - **Verificación (tareas 4.1–4.2):** `terraform test` ejecutado en `infra/modules/kms/` completa todos los bloques `run` con estado `pass` y código de salida 0, sin credenciales AWS en el entorno.

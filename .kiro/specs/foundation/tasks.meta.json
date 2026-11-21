@@ -120,6 +120,16 @@
         "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
         "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
         "timestamp": 1795274945316
+      },
+      {
+        "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
+        "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
+        "timestamp": 1795275127955
+      },
+      {
+        "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
+        "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
+        "timestamp": 1795275188724
       }
     ],
     "4.2 Añadir al mismo archivo el bloque `run \"invalid_window\"` (`command = plan`): bloque `variables {}` con `deletion_window_in_days = 5` y `expect_failures = [var.deletion_window_in_days]`": [
@@ -127,6 +137,16 @@
         "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
         "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
         "timestamp": 1795274945337
+      },
+      {
+        "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
+        "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
+        "timestamp": 1795275191426
+      },
+      {
+        "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
+        "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
+        "timestamp": 1795275212409
       }
     ],
     "5.1 Crear `infra/bootstrap/versions.tf` con `required_version = \">= 1.10\"` y el provider `hashicorp/aws ~> 6.73`": [
@@ -239,6 +259,13 @@
         "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
         "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
         "timestamp": 1795275123326
+      }
+    ],
+    "4. Tests del módulo `kms`": [
+      {
+        "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
+        "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
+        "timestamp": 1795275212474
       }
     ]
   }
