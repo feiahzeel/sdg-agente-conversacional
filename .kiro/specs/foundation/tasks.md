@@ -144,7 +144,7 @@ Establece los cimientos del repositorio de infraestructura: estructura de carpet
   - _Design: Componente 2.1 — backend.tf y outputs.tf; Componente 2.6 — Flujo de bootstrapping_
   - **Verificación:** `terraform validate` en `infra/bootstrap/` termina con código de salida 0 y sin errores; el archivo `README.md` contiene las instrucciones de migración con el bloque backend S3 de ejemplo.
 
-- [~] 12. Test de bootstrap
+- [x] 12. Test de bootstrap
   - Crear `infra/bootstrap/tests/bootstrap_test.tftest.hcl` con:
     - Seis declaraciones `mock_provider "aws" {}` al nivel raíz: una sin alias y cinco con `alias =` ("networking", "workload_dev", "workload_pre", "workload_prod", "dr")
     - Bloque `variables {}` con los 17 inputs de la sección 2.3 usando valores ficticios (`devops_account_id = "111111111111"`, etc.)
