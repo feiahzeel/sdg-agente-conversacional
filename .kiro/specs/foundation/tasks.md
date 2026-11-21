@@ -29,20 +29,20 @@ Establece los cimientos del repositorio de infraestructura: estructura de carpet
   - _Design: Componente 4 — Herramientas de calidad_
   - **Verificación:** revisión manual de que los cuatro archivos existen en la raíz con las versiones fijadas indicadas; `pre-commit run --all-files` pasa con código de salida 0 en entornos con las herramientas instaladas (verificación diferida a CI).
 
-- [ ] 3. Módulo `kms` — estructura e implementación
-  - [~] 3.1 Crear `infra/modules/kms/versions.tf` con `required_version = ">= 1.10"` y el provider `hashicorp/aws ~> 6.73`
+- [x] 3. Módulo `kms` — estructura e implementación
+  - [x] 3.1 Crear `infra/modules/kms/versions.tf` con `required_version = ">= 1.10"` y el provider `hashicorp/aws ~> 6.73`
     - _Requirements: 7.6, 11.2_
     - _Design: Componente 3.1 — Estructura de archivos_
-  - [~] 3.2 Crear `infra/modules/kms/variables.tf` con las variables `description` (string, validación longitud 1–256), `deletion_window_in_days` (number, validación 7–30 con mensaje de error), `alias_name` (string, validación regex `^alias/[a-zA-Z0-9/_-]+$`), `policy` (string, default `""`), `tags` (map(string), default `{}`); todas con `description` y `type` explícitos
+  - [x] 3.2 Crear `infra/modules/kms/variables.tf` con las variables `description` (string, validación longitud 1–256), `deletion_window_in_days` (number, validación 7–30 con mensaje de error), `alias_name` (string, validación regex `^alias/[a-zA-Z0-9/_-]+$`), `policy` (string, default `""`), `tags` (map(string), default `{}`); todas con `description` y `type` explícitos
     - _Requirements: 7.2, 7.3, 7.5_
     - _Design: Componente 3.2 — Interfaz del módulo_
-  - [~] 3.3 Crear `infra/modules/kms/main.tf` con `aws_kms_key.this` (`enable_key_rotation = true`, `deletion_window_in_days = var.deletion_window_in_days`, `policy = var.policy != "" ? var.policy : null`, `tags = var.tags`) y `aws_kms_alias.this` (`name = var.alias_name`, `target_key_id = aws_kms_key.this.key_id`)
+  - [x] 3.3 Crear `infra/modules/kms/main.tf` con `aws_kms_key.this` (`enable_key_rotation = true`, `deletion_window_in_days = var.deletion_window_in_days`, `policy = var.policy != "" ? var.policy : null`, `tags = var.tags`) y `aws_kms_alias.this` (`name = var.alias_name`, `target_key_id = aws_kms_key.this.key_id`)
     - _Requirements: 7.2, 7.3, 7.9_
     - _Design: Componente 3.3 — Lógica interna_
-  - [~] 3.4 Crear `infra/modules/kms/outputs.tf` con los outputs `key_id`, `key_arn` y `alias_arn`, cada uno con `description` no vacía
+  - [x] 3.4 Crear `infra/modules/kms/outputs.tf` con los outputs `key_id`, `key_arn` y `alias_arn`, cada uno con `description` no vacía
     - _Requirements: 7.4_
     - _Design: Componente 3.2 — Outputs_
-  - [~] 3.5 Crear `infra/modules/kms/README.md` con al menos las secciones Requirements, Inputs, Outputs y Resources (contenido generado manualmente o mediante `terraform-docs`)
+  - [x] 3.5 Crear `infra/modules/kms/README.md` con al menos las secciones Requirements, Inputs, Outputs y Resources (contenido generado manualmente o mediante `terraform-docs`)
     - _Requirements: 7.1_
     - _Design: Componente 3.1 — Estructura de archivos_
   - **Verificación (tareas 3.1–3.5):** `terraform validate` en `infra/modules/kms/` termina con código de salida 0 y sin mensajes de error.
