@@ -20,7 +20,7 @@ Establece los cimientos del repositorio de infraestructura: estructura de carpet
   - _Design: Componente 1 — Árbol completo_
   - **Verificación:** `git status` no muestra archivos `untracked` en ninguna carpeta del árbol; todas las carpetas listadas en el criterio 1.1 y 1.4 existen en el repositorio.
 
-- [~] 2. Archivos de herramientas de calidad
+- [x] 2. Archivos de herramientas de calidad
   - Crear `.tflint.hcl` con el plugin AWS (`source = "github.com/terraform-linters/tflint-ruleset-aws"`, `version = "0.48.0"`), reglas `terraform_naming_convention`, `terraform_typed_variables`, `terraform_required_version` y `terraform_required_providers`
   - Crear `.checkov.yaml` con `directory: infra/`, `output-file-type: sarif`, sin filtro de severidad y sección `skip-check:` con `CKV_AWS_144`, `CKV2_AWS_62` y `CKV_AWS_18`, cada uno con comentario justificativo en la misma línea
   - Crear `.pre-commit-config.yaml` con hooks de `antonbabenko/pre-commit-terraform` en `rev: v1.99.4` (`terraform_fmt`, `terraform_validate`, `terraform_tflint`, `terraform_checkov`, `terraform_docs`) y `pre-commit/pre-commit-hooks` en `rev: v5.0.0` (`trailing-whitespace`, `end-of-file-fixer`, `check-merge-conflict`, `check-yaml`); cada hook incluye el campo `rev:` con versión concreta
