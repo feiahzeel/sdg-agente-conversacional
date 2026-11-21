@@ -8,6 +8,10 @@ resource "aws_kms_key" "state" {
   enable_key_rotation     = true
   deletion_window_in_days = 10
 
+  # KMS rejects policies that name principals that do not exist yet; the policy
+  # uses locals (no attribute references), so this adds ordering without a cycle.
+  depends_on = [aws_iam_role.github_plan, aws_iam_role.github_apply]
+
   # All principal ARNs come from variables/locals (not from aws_iam_role attributes)
   # to avoid a dependency cycle with the roles and keep the ARNs known at plan time.
   policy = jsonencode({

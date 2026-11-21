@@ -104,7 +104,7 @@ Establece los cimientos del repositorio de infraestructura: estructura de carpet
   - _Design: Componente 2.2 — KMS, S3, IAM OIDC_
   - **Verificación:** `terraform validate` en `infra/bootstrap/` termina con código de salida 0 y sin errores.
 
-- [~] 9. Bootstrap — roles IAM de GitHub Actions
+- [x] 9. Bootstrap — roles IAM de GitHub Actions
   - Añadir a `infra/bootstrap/main.tf` (o en `iam_roles.tf` si se prefiere separar) los recursos:
     - `aws_iam_role.github_plan`: trust policy con `sts:AssumeRoleWithWebIdentity` desde `local.github_oidc_arn`; condición `StringLike` sobre `token.actions.githubusercontent.com:sub` aceptando `repo:<org>/<repo>:pull_request` y `repo:<org>/<repo>:ref:refs/heads/main`
     - `aws_iam_role.github_apply`: trust policy análoga; condición `StringLike` aceptando `repo:<org>/<repo>:ref:refs/heads/main` y `repo:<org>/<repo>:environment:*`
