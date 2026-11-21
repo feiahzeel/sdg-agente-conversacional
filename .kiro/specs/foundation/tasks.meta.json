@@ -307,6 +307,16 @@
         "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
         "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
         "timestamp": 1795274945574
+      },
+      {
+        "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
+        "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
+        "timestamp": 1795275753088
+      },
+      {
+        "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
+        "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
+        "timestamp": 1795275779428
       }
     ],
     "11. Bootstrap — `outputs.tf`, `backend.tf` y `README.md`": [
@@ -363,6 +373,13 @@
         "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
         "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
         "timestamp": 1795275253784
+      }
+    ],
+    "10. Bootstrap — módulo hijo `target-roles` y cinco invocaciones": [
+      {
+        "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
+        "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
+        "timestamp": 1795275779466
       }
     ]
   }

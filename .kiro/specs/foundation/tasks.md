@@ -117,7 +117,7 @@ Establece los cimientos del repositorio de infraestructura: estructura de carpet
   - _Design: Componente 2.2 — Roles GitHub Actions_
   - **Verificación:** `terraform validate` en `infra/bootstrap/` termina con código de salida 0 y sin errores.
 
-- [ ] 10. Bootstrap — módulo hijo `target-roles` y cinco invocaciones
+- [x] 10. Bootstrap — módulo hijo `target-roles` y cinco invocaciones
   - [x] 10.1 Crear `infra/bootstrap/modules/target-roles/versions.tf` con `required_version = ">= 1.10"` y el provider `hashicorp/aws ~> 6.73`
     - _Requirements: 5.7_
     - _Design: Componente 2.2 — Roles destino_
@@ -131,7 +131,7 @@ Establece los cimientos del repositorio de infraestructura: estructura de carpet
     - `aws_iam_policy.deploy_base`: política placeholder (permiso mínimo temporal; se amplía en specs posteriores)
     - _Requirements: 5.1, 5.2, 5.3, 5.4_
     - _Design: Componente 2.2 — Roles destino; módulo hijo_
-  - [~] 10.4 Añadir a `infra/bootstrap/main.tf` los cinco bloques `module` explícitos (`target_roles_networking`, `target_roles_workload_dev`, `target_roles_workload_pre`, `target_roles_workload_prod`, `target_roles_dr`) con `source = "./modules/target-roles"`, las tres variables de entrada y `providers = { aws = aws.<alias> }` usando la referencia literal de cada alias
+  - [x] 10.4 Añadir a `infra/bootstrap/main.tf` los cinco bloques `module` explícitos (`target_roles_networking`, `target_roles_workload_dev`, `target_roles_workload_pre`, `target_roles_workload_prod`, `target_roles_dr`) con `source = "./modules/target-roles"`, las tres variables de entrada y `providers = { aws = aws.<alias> }` usando la referencia literal de cada alias
     - _Requirements: 5.1, 5.2, 5.7_
     - _Design: Componente 2.2 — cinco bloques module explícitos_
   - **Verificación:** `terraform validate` en `infra/bootstrap/` termina con código de salida 0 y sin errores.

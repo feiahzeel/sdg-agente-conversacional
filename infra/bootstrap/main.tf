@@ -141,3 +141,67 @@ locals {
     : data.aws_iam_openid_connect_provider.github[0].arn
   )
 }
+
+# ---------------------------------------------------------------------------
+# Target roles in each target account (explicit blocks: provider aliases must be literal)
+# ---------------------------------------------------------------------------
+module "target_roles_networking" {
+  source = "./modules/target-roles"
+
+  github_plan_arn  = local.github_plan_role_arn
+  github_apply_arn = local.github_apply_role_arn
+  account_name     = "networking"
+  enable_vpn       = var.enable_vpn
+
+  providers = {
+    aws = aws.networking
+  }
+}
+
+module "target_roles_workload_dev" {
+  source = "./modules/target-roles"
+
+  github_plan_arn  = local.github_plan_role_arn
+  github_apply_arn = local.github_apply_role_arn
+  account_name     = "workload-dev"
+
+  providers = {
+    aws = aws.workload_dev
+  }
+}
+
+module "target_roles_workload_pre" {
+  source = "./modules/target-roles"
+
+  github_plan_arn  = local.github_plan_role_arn
+  github_apply_arn = local.github_apply_role_arn
+  account_name     = "workload-pre"
+
+  providers = {
+    aws = aws.workload_pre
+  }
+}
+
+module "target_roles_workload_prod" {
+  source = "./modules/target-roles"
+
+  github_plan_arn  = local.github_plan_role_arn
+  github_apply_arn = local.github_apply_role_arn
+  account_name     = "workload-prod"
+
+  providers = {
+    aws = aws.workload_prod
+  }
+}
+
+module "target_roles_dr" {
+  source = "./modules/target-roles"
+
+  github_plan_arn  = local.github_plan_role_arn
+  github_apply_arn = local.github_apply_role_arn
+  account_name     = "dr"
+
+  providers = {
+    aws = aws.dr
+  }
+}
