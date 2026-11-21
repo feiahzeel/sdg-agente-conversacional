@@ -85,7 +85,7 @@ Establece los cimientos del repositorio de infraestructura: estructura de carpet
   - _Design: Componente 2.1 — iam_policies.tf; Componente 2.2 — Roles GitHub; Componente 2.5 — Política del bucket_
   - **Verificación:** `terraform validate` en `infra/bootstrap/` termina con código de salida 0 y sin errores.
 
-- [~] 8. Bootstrap — `main.tf` (KMS, S3, OIDC)
+- [x] 8. Bootstrap — `main.tf` (KMS, S3, OIDC)
   - Crear `infra/bootstrap/main.tf` con:
     - `local.target_accounts` (mapa con `account_id` y `region` de las cinco cuentas destino)
     - Recurso `aws_kms_key.state` (`enable_key_rotation = true`, `deletion_window_in_days = 10`, etiquetas desde `local.default_tags`)
