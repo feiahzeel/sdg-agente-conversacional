@@ -118,13 +118,13 @@ Establece los cimientos del repositorio de infraestructura: estructura de carpet
   - **Verificación:** `terraform validate` en `infra/bootstrap/` termina con código de salida 0 y sin errores.
 
 - [ ] 10. Bootstrap — módulo hijo `target-roles` y cinco invocaciones
-  - [~] 10.1 Crear `infra/bootstrap/modules/target-roles/versions.tf` con `required_version = ">= 1.10"` y el provider `hashicorp/aws ~> 6.73`
+  - [x] 10.1 Crear `infra/bootstrap/modules/target-roles/versions.tf` con `required_version = ">= 1.10"` y el provider `hashicorp/aws ~> 6.73`
     - _Requirements: 5.7_
     - _Design: Componente 2.2 — Roles destino_
-  - [~] 10.2 Crear `infra/bootstrap/modules/target-roles/variables.tf` con las variables `github_plan_arn` (string), `github_apply_arn` (string), `account_name` (string) y `enable_vpn` (bool, default `false`); todas con `description` y `type`
+  - [x] 10.2 Crear `infra/bootstrap/modules/target-roles/variables.tf` con las variables `github_plan_arn` (string), `github_apply_arn` (string), `account_name` (string) y `enable_vpn` (bool, default `false`); todas con `description` y `type`
     - _Requirements: 5.5, 5.6_
     - _Design: Componente 2.2 — Roles destino_
-  - [~] 10.3 Crear `infra/bootstrap/modules/target-roles/main.tf` con:
+  - [x] 10.3 Crear `infra/bootstrap/modules/target-roles/main.tf` con:
     - `aws_iam_role.chatbot_plan`: trust policy con `sts:AssumeRole` desde `var.github_plan_arn` sin comodines
     - `aws_iam_role.chatbot_deploy`: trust policy con `sts:AssumeRole` desde `var.github_apply_arn` sin comodines
     - `aws_iam_role_policy_attachment.plan_readonly`: adjunta `arn:aws:iam::aws:policy/ReadOnlyAccess` a `chatbot_plan`
