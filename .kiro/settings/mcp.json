@@ -1,39 +1,34 @@
 {
   "mcpServers": {
     "terraform": {
-      "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "hashicorp/terraform-mcp-server"
-      ],
+      "command": "/usr/local/bin/docker",
+      "args": ["run", "-i", "--rm", "hashicorp/terraform-mcp-server"],
       "disabled": false,
       "autoApprove": []
     },
-    "awslabs.aws-pricing-mcp-server": {
-      "command": "uvx",
-      "args": [
-        "awslabs.aws-pricing-mcp-server@latest"
-      ],
+    "aws-pricing": {
+      "command": "/Users/iahzeelflores/.local/bin/uvx",
+      "args": ["awslabs.aws-pricing-mcp-server@latest"],
       "env": {
-        "FASTMCP_LOG_LEVEL": "ERROR",
         "AWS_PROFILE": "aws-cicd-lab",
-        "AWS_REGION": "us-east-1"
-      },
-      "disabled": false,
-      "autoApprove": []
-    },
-    "awslabs.aws-documentation-mcp-server": {
-      "command": "uvx",
-      "args": [
-        "awslabs.aws-documentation-mcp-server@latest"
-      ],
-      "env": {
+        "AWS_REGION": "us-east-1",
         "FASTMCP_LOG_LEVEL": "ERROR"
       },
       "disabled": false,
       "autoApprove": []
-    }
+    },
+    "aws-documentation": {
+      "command": "/Users/iahzeelflores/.local/bin/uvx",
+      "args": ["awslabs.aws-documentation-mcp-server@latest"],
+      "env": { "FASTMCP_LOG_LEVEL": "ERROR" },
+      "disabled": false,
+      "autoApprove": []
+    },
+
+    "aws-mcp":    { "command": "true", "disabled": true },
+    "jira":       { "command": "true", "disabled": true },
+    "lucid":      { "url": "https://mcp.lucid.app/mcp", "disabled": true },
+    "github":     { "command": "true", "disabled": true },
+    "playwright": { "command": "true", "disabled": true }
   }
 }
