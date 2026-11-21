@@ -57,11 +57,11 @@ Establece los cimientos del repositorio de infraestructura: estructura de carpet
     - _Design: Componente 3.4 — run "invalid_window"_
   - **Verificación (tareas 4.1–4.2):** `terraform test` ejecutado en `infra/modules/kms/` completa todos los bloques `run` con estado `pass` y código de salida 0, sin credenciales AWS en el entorno.
 
-- [ ] 5. Bootstrap — `versions.tf` y `variables.tf`
-  - [~] 5.1 Crear `infra/bootstrap/versions.tf` con `required_version = ">= 1.10"` y el provider `hashicorp/aws ~> 6.73`
+- [x] 5. Bootstrap — `versions.tf` y `variables.tf`
+  - [x] 5.1 Crear `infra/bootstrap/versions.tf` con `required_version = ">= 1.10"` y el provider `hashicorp/aws ~> 6.73`
     - _Requirements: 11.1_
     - _Design: Componente 2.1 — versions.tf_
-  - [~] 5.2 Crear `infra/bootstrap/variables.tf` con todas las variables definidas en la sección 2.3 del diseño: `state_bucket_name`, `devops_account_id`, `networking_account_id`, `workload_dev_account_id`, `workload_pre_account_id`, `workload_prod_account_id`, `dr_account_id` (regex `^[0-9]{12}$`), `github_org`, `github_repo` (validación no vacía), `create_github_oidc_provider` (bool, default `true`), `allowed_principals` (list(string), validación `length >= 1`), `break_glass_role_arn` (regex `^arn:aws:iam::`), `bootstrap_operator_arn` (regex `^arn:aws:iam::[0-9]{12}:(role|user)/`), `enable_vpn` (bool, default `false`), `project`, `environment`, `owner`, `cost_center`, `data_classification` (todos string, validación no vacía ni solo espacios)
+  - [x] 5.2 Crear `infra/bootstrap/variables.tf` con todas las variables definidas en la sección 2.3 del diseño: `state_bucket_name`, `devops_account_id`, `networking_account_id`, `workload_dev_account_id`, `workload_pre_account_id`, `workload_prod_account_id`, `dr_account_id` (regex `^[0-9]{12}$`), `github_org`, `github_repo` (validación no vacía), `create_github_oidc_provider` (bool, default `true`), `allowed_principals` (list(string), validación `length >= 1`), `break_glass_role_arn` (regex `^arn:aws:iam::`), `bootstrap_operator_arn` (regex `^arn:aws:iam::[0-9]{12}:(role|user)/`), `enable_vpn` (bool, default `false`), `project`, `environment`, `owner`, `cost_center`, `data_classification` (todos string, validación no vacía ni solo espacios)
     - _Requirements: 2.7, 4.5, 5.5, 12.2_
     - _Design: Componente 2.3 — Variables de bootstrap_
   - **Verificación:** `terraform validate` en `infra/bootstrap/` termina con código de salida 0 (puede requerir un `providers.tf` mínimo para que el directorio sea válido; crear junto con la tarea 6).

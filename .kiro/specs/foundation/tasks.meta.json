@@ -154,6 +154,16 @@
         "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
         "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
         "timestamp": 1795274945359
+      },
+      {
+        "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
+        "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
+        "timestamp": 1795275219569
+      },
+      {
+        "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
+        "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
+        "timestamp": 1795275251346
       }
     ],
     "5.2 Crear `infra/bootstrap/variables.tf` con todas las variables definidas en la sección 2.3 del diseño: `state_bucket_name`, `devops_account_id`, `networking_account_id`, `workload_dev_account_id`, `workload_pre_account_id`, `workload_prod_account_id`, `dr_account_id` (regex `^[0-9]{12}$`), `github_org`, `github_repo` (validación no vacía), `create_github_oidc_provider` (bool, default `true`), `allowed_principals` (list(string), validación `length >= 1`), `break_glass_role_arn` (regex `^arn:aws:iam::`), `bootstrap_operator_arn` (regex `^arn:aws:iam::[0-9]{12}:(role|user)/`), `enable_vpn` (bool, default `false`), `project`, `environment`, `owner`, `cost_center`, `data_classification` (todos string, validación no vacía ni solo espacios)": [
@@ -161,6 +171,16 @@
         "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
         "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
         "timestamp": 1795274945382
+      },
+      {
+        "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
+        "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
+        "timestamp": 1795275219788
+      },
+      {
+        "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
+        "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
+        "timestamp": 1795275253744
       }
     ],
     "6. Bootstrap — `providers.tf`": [
@@ -266,6 +286,13 @@
         "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
         "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
         "timestamp": 1795275212474
+      }
+    ],
+    "5. Bootstrap — `versions.tf` y `variables.tf`": [
+      {
+        "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
+        "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
+        "timestamp": 1795275253784
       }
     ]
   }
