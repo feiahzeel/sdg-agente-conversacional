@@ -1,4 +1,5 @@
 resource "aws_kms_key" "this" {
+  #checkov:skip=CKV2_AWS_64:la política de clave la aporta quien invoca el módulo
   description             = var.description
   enable_key_rotation     = true
   deletion_window_in_days = var.deletion_window_in_days

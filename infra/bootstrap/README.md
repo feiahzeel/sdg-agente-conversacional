@@ -49,6 +49,10 @@ Con `use_lockfile = true` el bloqueo es un objeto `<key>.tflock` en el mismo buc
 
 Antes de desbloquear, confirma que ningún otro proceso de Terraform está en ejecución.
 
+## Nota: fallo del primer `terraform apply`
+
+El primer `terraform apply` puede fallar al crear la política de la CMK con `MalformedPolicyDocument`. La causa es la propagación eventual de IAM: la política referencia principals (roles) recién creados que aún no son visibles para KMS. Basta con repetir `terraform apply`.
+
 ## Outputs
 
 | Output | Descripción |
