@@ -1,7 +1,10 @@
 directory:
   - infra/
 
-output-file-type: sarif
+output:
+  - cli
+  - sarif
+output-file-path: console,.checkov-results
 
 # No severity filter: checkov runs all available checks by default
 # in CLI mode without an API key.
@@ -10,3 +13,4 @@ skip-check:
   - CKV_AWS_144  # Replicación cross-region de S3: no requerida en bucket de estado bootstrap
   - CKV2_AWS_62  # Notificaciones de eventos en bucket S3: no aplica en bootstrap
   - CKV_AWS_18   # Logging de acceso en bucket S3: se delega a CloudTrail (spec: operations-dr)
+  - CKV2_AWS_64  # módulo reutilizable; la política de la clave la aporta el llamador mediante var.policy

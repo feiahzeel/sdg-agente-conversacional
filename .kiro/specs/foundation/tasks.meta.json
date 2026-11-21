@@ -358,6 +358,16 @@
         "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
         "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
         "timestamp": 1795274945668
+      },
+      {
+        "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
+        "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
+        "timestamp": 1795275934457
+      },
+      {
+        "executionId": "9647a7f4-028d-4f50-950b-fcf4d2be06b5",
+        "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
+        "timestamp": 1795276397727
       }
     ],
     "14. ADR-001 — Estructura del repositorio y herramientas Terraform": [
@@ -365,6 +375,11 @@
         "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
         "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
         "timestamp": 1795274945691
+      },
+      {
+        "executionId": "9647a7f4-028d-4f50-950b-fcf4d2be06b5",
+        "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
+        "timestamp": 1795276397810
       }
     ],
     "15. ADR-002 — Bloqueo de estado con `use_lockfile`": [
@@ -372,6 +387,11 @@
         "executionId": "d25049e7-7966-46f7-9609-a955b56fc075",
         "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
         "timestamp": 1795274945711
+      },
+      {
+        "executionId": "9647a7f4-028d-4f50-950b-fcf4d2be06b5",
+        "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
+        "timestamp": 1795276397867
       }
     ],
     "3. Módulo `kms` — estructura e implementación": [

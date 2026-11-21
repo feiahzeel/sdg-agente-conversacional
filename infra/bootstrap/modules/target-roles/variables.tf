@@ -13,6 +13,8 @@ variable "account_name" {
   type        = string
 }
 
+# Reserved by the foundation spec (req. VPN permissions only when true); consumed by the networking spec, so intentionally unused for now.
+# tflint-ignore: terraform_unused_declarations
 variable "enable_vpn" {
   description = "Whether the Site-to-Site VPN is enabled; allows the deploy role to manage VPN resources when true."
   type        = bool

@@ -20,3 +20,6 @@ terraform.rc
 *.tfstate.backup
 *.tflock
 *.auto.tfvars
+
+# checkov output
+.checkov-results

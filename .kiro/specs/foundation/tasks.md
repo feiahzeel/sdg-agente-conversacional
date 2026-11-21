@@ -157,7 +157,7 @@ Establece los cimientos del repositorio de infraestructura: estructura de carpet
   - _Design: Componente 2.7 — Test del bootstrap; Correctness Properties P-IAM-01..04 y P-S3-02_
   - **Verificación:** `terraform test` ejecutado en `infra/bootstrap/` completa los cinco bloques `run` con estado `pass` y código de salida 0, sin credenciales AWS en el entorno.
 
-- [~] 13. Checkpoint — validación integral del código Terraform
+- [x] 13. Checkpoint — validación integral del código Terraform
   - Ejecutar `terraform init -backend=false` en `infra/modules/kms/` y luego `terraform validate`; confirmar código de salida 0
   - Ejecutar `terraform test` en `infra/modules/kms/`; confirmar que los dos bloques `run` (`valid_key` e `invalid_window`) pasan con estado `pass`
   - Ejecutar `terraform init -backend=false` en `infra/bootstrap/` y luego `terraform validate`; confirmar código de salida 0
@@ -168,7 +168,7 @@ Establece los cimientos del repositorio de infraestructura: estructura de carpet
   - Resolver cualquier error antes de continuar con los ADRs
   - **Verificación:** `terraform validate` en `infra/modules/kms/` y `infra/bootstrap/` terminan con código de salida 0; `terraform test` en ambos directorios completa todos los `run` con estado `pass`; `terraform fmt -check -recursive infra/` termina con código de salida 0; `tflint --recursive` no reporta errores; `checkov` termina con código de salida 0 (todos los checks pasan o están justificados en `skip-check:`).
 
-- [~] 14. ADR-001 — Estructura del repositorio y herramientas Terraform
+- [-] 14. ADR-001 — Estructura del repositorio y herramientas Terraform
   - Crear `docs/adr/ADR-001-terraform-estructura-repositorio.md` con las secciones definidas en el diseño: Contexto, Opciones evaluadas, Decisión y Consecuencias
   - La sección Contexto debe mencionar los requisitos del proyecto (multicuenta, CI/CD sin secretos, prueba técnica evaluable)
   - La sección Opciones evaluadas debe comparar: (A) Terraform monolítico cuenta única, (B) módulos + composición en `live/` con `provider assume_role`, (C) Terragrunt; con al menos una ventaja y una limitación por opción
@@ -178,7 +178,7 @@ Establece los cimientos del repositorio de infraestructura: estructura de carpet
   - _Design: Componente — ADR-001_
   - **Verificación:** el archivo existe en la ruta `docs/adr/ADR-001-terraform-estructura-repositorio.md`; contiene las cuatro secciones con contenido sustantivo; menciona explícitamente `use_lockfile = true`, estructura multicuenta, `tflint` y `checkov`.
 
-- [~] 15. ADR-002 — Bloqueo de estado con `use_lockfile`
+- [-] 15. ADR-002 — Bloqueo de estado con `use_lockfile`
   - Crear `docs/adr/ADR-002-bloqueo-estado-use-lockfile.md` con las secciones: Contexto, Opciones evaluadas, Decisión y Consecuencias
   - La sección Contexto debe describir el problema del locking de estado concurrente y la historia de Terraform hasta 1.10/1.11
   - La sección Opciones evaluadas debe incluir la tabla comparativa con las cuatro columnas del requisito 10.3: coste estimado, recursos AWS adicionales, procedimiento de desbloqueo, estado de soporte (`dynamodb_table` deprecado en Terraform 1.11)
