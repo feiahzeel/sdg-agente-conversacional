@@ -380,6 +380,11 @@
         "executionId": "9647a7f4-028d-4f50-950b-fcf4d2be06b5",
         "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
         "timestamp": 1795276397810
+      },
+      {
+        "executionId": "9647a7f4-028d-4f50-950b-fcf4d2be06b5",
+        "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
+        "timestamp": 1795276440725
       }
     ],
     "15. ADR-002 — Bloqueo de estado con `use_lockfile`": [
@@ -392,6 +397,11 @@
         "executionId": "9647a7f4-028d-4f50-950b-fcf4d2be06b5",
         "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
         "timestamp": 1795276397867
+      },
+      {
+        "executionId": "9647a7f4-028d-4f50-950b-fcf4d2be06b5",
+        "chatSessionId": "sess_1784dc2a-9b93-463e-89be-daa2a4bebf4e",
+        "timestamp": 1795276441462
       }
     ],
     "3. Módulo `kms` — estructura e implementación": [
