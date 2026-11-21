@@ -66,7 +66,7 @@ Establece los cimientos del repositorio de infraestructura: estructura de carpet
     - _Design: Componente 2.3 — Variables de bootstrap_
   - **Verificación:** `terraform validate` en `infra/bootstrap/` termina con código de salida 0 (puede requerir un `providers.tf` mínimo para que el directorio sea válido; crear junto con la tarea 6).
 
-- [~] 6. Bootstrap — `providers.tf`
+- [x] 6. Bootstrap — `providers.tf`
   - Crear `infra/bootstrap/providers.tf` con el provider por defecto (`region = "eu-west-1"`, bloque `default_tags { tags = local.default_tags }`) y cinco providers con alias: `networking`, `workload_dev`, `workload_pre`, `workload_prod` (todos `region = "eu-west-1"`) y `dr` (`region = "eu-central-1"`); cada uno con `assume_role { role_arn = "arn:aws:iam::<account_id_var>:role/OrganizationAccountAccessRole" }` y `default_tags`
   - Declarar `local.default_tags` (mapa con `Project`, `Environment`, `Owner`, `CostCenter`, `ManagedBy = "terraform"`, `DataClassification` construido desde las variables de etiquetado) en un bloque `locals` del mismo archivo o en `main.tf`
   - _Requirements: 5.7, 12.1_
