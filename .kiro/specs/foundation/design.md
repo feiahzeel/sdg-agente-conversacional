@@ -32,7 +32,7 @@ flowchart TD
         KMS["aws_kms_key\nchatbot-devops-tfstate\nenable_key_rotation = true"]
         S3["aws_s3_bucket\ntfstate\nVersionado + SSE-KMS\nBlock public access"]
         POL_PLAN["aws_iam_policy\ngithub-plan-policy\nS3 read + .tflock + KMS"]
-        POL_APPLY["aws_iam_policy\ngithub-apply-policy\nS3 write + KMS + ECR + IAM(OIDC)"]
+        POL_APPLY["aws_iam_policy\ngithub-apply-policy\nS3 write + KMS (uso, con condición de alias) + ECR"]
     end
 
     subgraph TARGET["Cuentas destino (×5)\nNetworking · Dev · Pre · Prod · DR"]
@@ -65,10 +65,7 @@ flowchart TD
 sdg-agente-conversacional/
 ├── .github/
 │   └── workflows/
-│       ├── pr.yml          # lint + validate + plan (spec: cicd)
-│       ├── apply.yml       # apply en push a main (spec: cicd)
-│       ├── drift.yml       # detección de drift diario (spec: cicd)
-│       └── images.yml      # build/push imágenes ECR (opcional, spec: cicd)
+│       └── .gitkeep        # sin YAML stub (un YAML vacío es un workflow inválido); pr/apply/drift/images.yml los crea el spec cicd
 ├── .gitignore              # entradas Terraform + preexistentes
 ├── .tflint.hcl             # configuración TFLint con plugin AWS
 ├── .checkov.yaml           # configuración Checkov para infra/
@@ -194,7 +191,7 @@ locals {
 
 | Nombre lógico | Tipo | Argumentos clave |
 |---|---|---|
-| `aws_kms_key.state` | `aws_kms_key` | `enable_key_rotation = true`, `deletion_window_in_days = 10`, `description` por variable |
+| `aws_kms_key.state` | `aws_kms_key` | `enable_key_rotation = true`, `deletion_window_in_days = 10`, `description` por variable; `policy` explícita: `kms:*` para la raíz de la cuenta DevOps y `Decrypt`/`Encrypt`/`GenerateDataKey`/`DescribeKey` solo para `local.github_plan_role_arn`, `local.github_apply_role_arn`, `var.bootstrap_operator_arn` y `var.break_glass_role_arn` (ARN construidos con variables; CKV2_AWS_64) |
 | `aws_kms_alias.state` | `aws_kms_alias` | `name = "alias/chatbot-devops-tfstate"`, `target_key_id = aws_kms_key.state.key_id` |
 
 ##### S3 (cuenta DevOps)
@@ -205,6 +202,7 @@ locals {
 | `aws_s3_bucket_versioning.tfstate` | `aws_s3_bucket_versioning` | `status = "Enabled"` |
 | `aws_s3_bucket_server_side_encryption_configuration.tfstate` | SSE config | `sse_algorithm = "aws:kms"`, `kms_master_key_id = aws_kms_key.state.arn` |
 | `aws_s3_bucket_public_access_block.tfstate` | Public access block | Los 4 atributos en `true` |
+| `aws_s3_bucket_lifecycle_configuration.tfstate` | Lifecycle | `noncurrent_version_expiration` a 90 días (CKV2_AWS_61) |
 | `aws_s3_bucket_policy.tfstate` | Bucket policy | Dos `Deny`: no-TLS y acceso no autorizado (ver §2.5) |
 
 ##### IAM OIDC (cuenta DevOps)
@@ -230,8 +228,8 @@ locals {
 |---|---|---|
 | `aws_iam_role.github_plan` | `aws_iam_role` | `AssumeRoleWithWebIdentity`, `StringLike` sub: `repo:<org>/<repo>:pull_request` y `repo:<org>/<repo>:ref:refs/heads/main` |
 | `aws_iam_role.github_apply` | `aws_iam_role` | `AssumeRoleWithWebIdentity`, `StringLike` sub: `repo:<org>/<repo>:ref:refs/heads/main` y `repo:<org>/<repo>:environment:*` |
-| `aws_iam_policy.github_plan` | `aws_iam_policy` | S3 `GetObject`+`ListBucket` sobre bucket estado; S3 `PutObject`+`DeleteObject` sobre `*.tflock`; KMS `Decrypt`+`Encrypt`+`GenerateDataKey`; `sts:AssumeRole` → ARNs `chatbot-plan-role` |
-| `aws_iam_policy.github_apply` | `aws_iam_policy` | S3 CRUD estado; `.tflock`; KMS; ECR (DevOps); IAM permisos propios OIDC; `sts:AssumeRole` → ARNs `chatbot-deploy-role`; sin permisos EC2/ECS/RDS |
+| `aws_iam_policy.github_plan` | `aws_iam_policy` | S3 `GetObject`+`ListBucket` sobre bucket estado; S3 `PutObject`+`DeleteObject` sobre `*.tflock`; KMS `Decrypt`+`Encrypt`+`GenerateDataKey` sobre `arn:aws:kms:eu-west-1:${var.devops_account_id}:key/*` con `ForAnyValue:StringEquals` `kms:ResourceAliases = alias/chatbot-devops-tfstate`; `sts:AssumeRole` → ARNs `chatbot-plan-role` |
+| `aws_iam_policy.github_apply` | `aws_iam_policy` | S3 CRUD estado; `.tflock`; KMS (`Decrypt`+`Encrypt`+`GenerateDataKey`, misma condición de alias); ECR (DevOps); `sts:AssumeRole` → ARNs `chatbot-deploy-role`; sin acciones `iam:*`, sin gestión de KMS y sin permisos de servicios workload (OIDC y roles se crean en el bootstrap local) |
 | `aws_iam_role_policy_attachment.github_plan` | attachment | Adjunta `github_plan` → `github-terraform-plan` |
 | `aws_iam_role_policy_attachment.github_apply` | attachment | Adjunta `github_apply` → `github-terraform-apply` |
 
@@ -699,6 +697,7 @@ skip-check:
   - CKV_AWS_144  # Replicación cross-region de S3: no requerida en bucket de estado bootstrap
   - CKV2_AWS_62  # Notificaciones de eventos en bucket S3: no aplica en bootstrap
   - CKV_AWS_18   # Logging de acceso en bucket S3: se delega a CloudTrail (spec: operations-dr)
+  - CKV2_AWS_64  # Solo si falla en el módulo kms: módulo reutilizable; la política de la clave la aporta el llamador mediante var.policy
 ```
 
 Cada excepción debe justificarse con un comentario en la misma línea; el archivo final puede ampliar esta lista cuando se implementen los módulos de specs posteriores.

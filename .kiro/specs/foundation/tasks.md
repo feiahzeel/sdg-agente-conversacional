@@ -99,7 +99,7 @@ Establece los cimientos del repositorio de infraestructura: estructura de carpet
     - Recurso `aws_iam_openid_connect_provider.github` (`count = var.create_github_oidc_provider ? 1 : 0`, `url = "https://token.actions.githubusercontent.com"`, `client_id_list = ["sts.amazonaws.com"]`; sin `thumbprint_list`)
     - `data "aws_iam_openid_connect_provider" "github"` (`count = var.create_github_oidc_provider ? 0 : 1`, ARN construido desde `var.devops_account_id`)
     - `local.github_oidc_arn` que unifica ambas ramas `count`
-    - Argumento `policy` en `aws_kms_key.state`: política KMS explícita con dos sentencias — (1) `kms:*` para el principal `arn:aws:iam::${var.devops_account_id}:root` (administración por la raíz de la cuenta); (2) `kms:Decrypt`, `kms:Encrypt`, `kms:GenerateDataKey` y `kms:DescribeKey` para los principals `aws_iam_role.github_plan.arn`, `aws_iam_role.github_apply.arn`, `var.bootstrap_operator_arn` y `var.break_glass_role_arn`; corrige el check de checkov `CKV2_AWS_64` (política de clave sin sentencias de uso restringido)
+    - Argumento `policy` en `aws_kms_key.state`: política KMS explícita con dos sentencias — (1) `kms:*` para el principal `arn:aws:iam::${var.devops_account_id}:root` (administración por la raíz de la cuenta); (2) `kms:Decrypt`, `kms:Encrypt`, `kms:GenerateDataKey` y `kms:DescribeKey` para los principals `local.github_plan_role_arn`, `local.github_apply_role_arn`, `var.bootstrap_operator_arn` y `var.break_glass_role_arn` (todos construidos desde variables, sin referenciar atributos de `aws_iam_role.*`, para evitar dependencia circular y mantener los ARN conocidos en plan); corrige el check de checkov `CKV2_AWS_64` (política de clave sin sentencias de uso restringido)
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 3.1, 3.2, 3.4_
   - _Design: Componente 2.2 — KMS, S3, IAM OIDC_
   - **Verificación:** `terraform validate` en `infra/bootstrap/` termina con código de salida 0 y sin errores.
@@ -153,7 +153,7 @@ Establece los cimientos del repositorio de infraestructura: estructura de carpet
     - Bloque `run "p_iam_03_plan_role_assumes_only_plan_roles"` (`command = plan`): assert que verifica P-IAM-03 — todo `sts:AssumeRole` en `github_plan_policy_json` apunta solo a ARNs que terminan en `:role/chatbot-plan-role`
     - Bloque `run "p_iam_04_apply_role_assumes_only_deploy_roles"` (`command = plan`): assert análogo para P-IAM-04 sobre `github_apply_policy_json` y `:role/chatbot-deploy-role`
     - Bloque `run "p_s3_02_tls_enforced"` (`command = plan`): assert que verifica P-S3-02 — existe un `Deny` en `bucket_policy_json` con `Condition.Bool["aws:SecureTransport"] == "false"`
-  - _Requirements: 2.5, 4.3, 4.4, 11.3, 11.4_
+  - _Requirements: 2, 4, 5_
   - _Design: Componente 2.7 — Test del bootstrap; Correctness Properties P-IAM-01..04 y P-S3-02_
   - **Verificación:** `terraform test` ejecutado en `infra/bootstrap/` completa los cinco bloques `run` con estado `pass` y código de salida 0, sin credenciales AWS en el entorno.
 
