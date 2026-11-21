@@ -73,7 +73,7 @@ Establece los cimientos del repositorio de infraestructura: estructura de carpet
   - _Design: Componente 2.4 — Providers con alias_
   - **Verificación:** `terraform validate` en `infra/bootstrap/` termina con código de salida 0 y sin errores.
 
-- [~] 7. Bootstrap — `iam_policies.tf`
+- [x] 7. Bootstrap — `iam_policies.tf`
   - Crear `infra/bootstrap/iam_policies.tf` con un bloque `locals` que contenga:
     - `state_bucket_arn`, `github_plan_role_arn`, `github_apply_role_arn` construidos mediante interpolación de variables (no atributos de recursos)
     - `chatbot_plan_role_arns` y `chatbot_deploy_role_arns` construidos con expresión `for` sobre `local.target_accounts`
