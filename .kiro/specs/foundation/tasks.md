@@ -136,7 +136,7 @@ Establece los cimientos del repositorio de infraestructura: estructura de carpet
     - _Design: Componente 2.2 — cinco bloques module explícitos_
   - **Verificación:** `terraform validate` en `infra/bootstrap/` termina con código de salida 0 y sin errores.
 
-- [~] 11. Bootstrap — `outputs.tf`, `backend.tf` y `README.md`
+- [x] 11. Bootstrap — `outputs.tf`, `backend.tf` y `README.md`
   - Crear `infra/bootstrap/outputs.tf` con los outputs definidos en la sección Data Models del diseño: `state_bucket_name`, `state_bucket_arn`, `state_kms_key_arn`, `github_plan_role_arn`, `github_apply_role_arn`, `chatbot_plan_role_arns` (mapa `cuenta → ARN`), `chatbot_deploy_role_arns` (mapa `cuenta → ARN`)
   - Crear `infra/bootstrap/backend.tf` con `backend "local" {}` (estado local inicial; se reemplaza manualmente antes de `terraform init -migrate-state`)
   - Crear `infra/bootstrap/README.md` con las secciones: Prerequisites, Uso inicial (pasos 1–3), Migración del estado a S3 (pasos 4–6 del diseño con el bloque backend S3 exacto y el comando `terraform init -migrate-state`), y Desbloqueo de lock huérfano
