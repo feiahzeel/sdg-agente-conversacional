@@ -32,7 +32,7 @@ flowchart TD
         KMS["aws_kms_key\nchatbot-devops-tfstate\nenable_key_rotation = true"]
         S3["aws_s3_bucket\ntfstate\nVersionado + SSE-KMS\nBlock public access"]
         POL_PLAN["aws_iam_policy\ngithub-plan-policy\nS3 read + .tflock + KMS"]
-        POL_APPLY["aws_iam_policy\ngithub-apply-policy\nS3 write + KMS + ECR + IAM(OIDC)"]
+        POL_APPLY["aws_iam_policy\ngithub-apply-policy\nS3 write + KMS (uso, con condición de alias) + ECR"]
     end
 
     subgraph TARGET["Cuentas destino (×5)\nNetworking · Dev · Pre · Prod · DR"]
@@ -65,10 +65,7 @@ flowchart TD
 sdg-agente-conversacional/
 ├── .github/
 │   └── workflows/
-│       ├── pr.yml          # lint + validate + plan (spec: cicd)
-│       ├── apply.yml       # apply en push a main (spec: cicd)
-│       ├── drift.yml       # detección de drift diario (spec: cicd)
-│       └── images.yml      # build/push imágenes ECR (opcional, spec: cicd)
+│       └── .gitkeep        # sin YAML stub (un YAML vacío es un workflow inválido); pr/apply/drift/images.yml los crea el spec cicd
 ├── .gitignore              # entradas Terraform + preexistentes
 ├── .tflint.hcl             # configuración TFLint con plugin AWS
 ├── .checkov.yaml           # configuración Checkov para infra/
@@ -163,7 +160,7 @@ Los módulos marcados con `.gitkeep` reciben solo ese archivo en este spec; su i
 | `versions.tf` | Restricción `terraform >= 1.10` y provider `hashicorp/aws ~> 6.73`. |
 | `README.md` | Instrucciones de uso, prerequisitos y procedimiento de migración de estado. |
 | `modules/target-roles/` | Módulo hijo local con los recursos `chatbot-plan-role` y `chatbot-deploy-role`. Invocado cinco veces desde `main.tf` con `providers = { aws = aws.<alias> }`. |
-| `tests/bootstrap_test.tftest.hcl` | Test de bootstrap con `mock_provider` para verificar propiedades IAM y S3 vía `jsondecode` sobre locals de políticas. |
+| `tests/bootstrap_test.tftest.hcl` | Test de bootstrap con `mock_provider` para verificar propiedades IAM y S3 vía `jsondecode` sobre los documentos de política de los recursos (`aws_iam_policy.github_plan.policy`, `aws_iam_policy.github_apply.policy`, `aws_s3_bucket_policy.tfstate.policy`). |
 
 **Construcción de ARNs en `iam_policies.tf`:** Todos los ARNs referenciados en las políticas IAM (bucket de estado, CMK, roles GitHub y roles destino) se construyen directamente a partir de variables mediante interpolación de cadena, **no** mediante atributos de recursos (`aws_s3_bucket.tfstate.arn`, etc.). Esto garantiza que los `locals` que contienen el JSON de las políticas son conocidos en la fase de plan — y por tanto disponibles en los asserts de `terraform test` — sin depender de valores computados por el provider.
 
@@ -172,7 +169,7 @@ Ejemplos de construcción en `iam_policies.tf`:
 locals {
   state_bucket_arn       = "arn:aws:s3:::${var.state_bucket_name}"
   # KMS: no se construye un ARN de CMK como local; se usa Resource wildcard
-  # con condición kms:ResourceAliases en las políticas IAM (ver github_plan_policy_json)
+  # con condición kms:ResourceAliases en las políticas IAM (ver `local.github_plan_policy_json` en `iam_policies.tf`)
   github_plan_role_arn   = "arn:aws:iam::${var.devops_account_id}:role/github-terraform-plan"
   github_apply_role_arn  = "arn:aws:iam::${var.devops_account_id}:role/github-terraform-apply"
 
@@ -194,7 +191,7 @@ locals {
 
 | Nombre lógico | Tipo | Argumentos clave |
 |---|---|---|
-| `aws_kms_key.state` | `aws_kms_key` | `enable_key_rotation = true`, `deletion_window_in_days = 10`, `description` por variable |
+| `aws_kms_key.state` | `aws_kms_key` | `enable_key_rotation = true`, `deletion_window_in_days = 10`, `description` por variable; `policy` explícita: `kms:*` para la raíz de la cuenta DevOps y `Decrypt`/`Encrypt`/`GenerateDataKey`/`DescribeKey` solo para `local.github_plan_role_arn`, `local.github_apply_role_arn`, `var.bootstrap_operator_arn` y `var.break_glass_role_arn` (ARN construidos con variables; CKV2_AWS_64) |
 | `aws_kms_alias.state` | `aws_kms_alias` | `name = "alias/chatbot-devops-tfstate"`, `target_key_id = aws_kms_key.state.key_id` |
 
 ##### S3 (cuenta DevOps)
@@ -205,6 +202,7 @@ locals {
 | `aws_s3_bucket_versioning.tfstate` | `aws_s3_bucket_versioning` | `status = "Enabled"` |
 | `aws_s3_bucket_server_side_encryption_configuration.tfstate` | SSE config | `sse_algorithm = "aws:kms"`, `kms_master_key_id = aws_kms_key.state.arn` |
 | `aws_s3_bucket_public_access_block.tfstate` | Public access block | Los 4 atributos en `true` |
+| `aws_s3_bucket_lifecycle_configuration.tfstate` | Lifecycle | `noncurrent_version_expiration` a 90 días (CKV2_AWS_61) |
 | `aws_s3_bucket_policy.tfstate` | Bucket policy | Dos `Deny`: no-TLS y acceso no autorizado (ver §2.5) |
 
 ##### IAM OIDC (cuenta DevOps)
@@ -230,8 +228,8 @@ locals {
 |---|---|---|
 | `aws_iam_role.github_plan` | `aws_iam_role` | `AssumeRoleWithWebIdentity`, `StringLike` sub: `repo:<org>/<repo>:pull_request` y `repo:<org>/<repo>:ref:refs/heads/main` |
 | `aws_iam_role.github_apply` | `aws_iam_role` | `AssumeRoleWithWebIdentity`, `StringLike` sub: `repo:<org>/<repo>:ref:refs/heads/main` y `repo:<org>/<repo>:environment:*` |
-| `aws_iam_policy.github_plan` | `aws_iam_policy` | S3 `GetObject`+`ListBucket` sobre bucket estado; S3 `PutObject`+`DeleteObject` sobre `*.tflock`; KMS `Decrypt`+`Encrypt`+`GenerateDataKey`; `sts:AssumeRole` → ARNs `chatbot-plan-role` |
-| `aws_iam_policy.github_apply` | `aws_iam_policy` | S3 CRUD estado; `.tflock`; KMS; ECR (DevOps); IAM permisos propios OIDC; `sts:AssumeRole` → ARNs `chatbot-deploy-role`; sin permisos EC2/ECS/RDS |
+| `aws_iam_policy.github_plan` | `aws_iam_policy` | S3 `GetObject`+`ListBucket` sobre bucket estado; S3 `PutObject`+`DeleteObject` sobre `*.tflock`; KMS `Decrypt`+`Encrypt`+`GenerateDataKey` sobre `arn:aws:kms:eu-west-1:${var.devops_account_id}:key/*` con `ForAnyValue:StringEquals` `kms:ResourceAliases = alias/chatbot-devops-tfstate`; `sts:AssumeRole` → ARNs `chatbot-plan-role` |
+| `aws_iam_policy.github_apply` | `aws_iam_policy` | S3 CRUD estado; `.tflock`; KMS (`Decrypt`+`Encrypt`+`GenerateDataKey`, misma condición de alias); ECR (DevOps); `sts:AssumeRole` → ARNs `chatbot-deploy-role`; sin acciones `iam:*`, sin gestión de KMS y sin permisos de servicios workload (OIDC y roles se crean en el bootstrap local) |
 | `aws_iam_role_policy_attachment.github_plan` | attachment | Adjunta `github_plan` → `github-terraform-plan` |
 | `aws_iam_role_policy_attachment.github_apply` | attachment | Adjunta `github_apply` → `github-terraform-apply` |
 
@@ -407,15 +405,16 @@ El uso de `Deny` con `ArnNotLike` (en lugar de `Allow`) garantiza que, si se añ
 
 ```hcl
 # bootstrap/tests/bootstrap_test.tftest.hcl
-**Por qué `local.*` es referenciable en los asserts:** La documentación oficial de Terraform (`terraform test`) confirma que "assertions within tests can reference any existing named values that are available within the main Terraform configuration". Los `locals` de `iam_policies.tf` se construyen con `jsonencode` sobre variables — no sobre atributos de recursos — por lo que son evaluados en HCL puro durante la fase de plan, sin llamadas al provider. No es necesario exponerlos como outputs.
+**Por qué los asserts leen las políticas desde los recursos:** los bloques `run` de `terraform test` no tienen acceso a `locals` (solo a variables, recursos, data sources y outputs). Por eso los asserts leen cada política del atributo `policy` del recurso que la consume: `aws_iam_policy.github_plan.policy`, `aws_iam_policy.github_apply.policy` y `aws_s3_bucket_policy.tfstate.policy`. Estos valores siguen siendo conocidos en plan porque los `locals` que los construyen (`iam_policies.tf`) se derivan solo de variables y `jsonencode`, sin atributos computados del provider.
 
 **Patrón de normalización de `Action` y `Resource`:** Las políticas IAM admiten tanto una cadena única como una lista en los campos `Action` y `Resource`. El patrón `flatten([tolist(try(tolist(stmt.Action), [stmt.Action]))])` normaliza ambos casos a lista antes de iterar, evitando errores de tipo en el assert.
 
 ```hcl
 # bootstrap/tests/bootstrap_test.tftest.hcl
 #
-# Verifica las propiedades P-IAM-01 a P-IAM-04 y P-S3-02 sobre los locals
-# de política (jsonencode en iam_policies.tf), sin necesidad de crear recursos reales.
+# Verifica las propiedades P-IAM-01 a P-IAM-04 y P-S3-02 sobre los documentos
+# de política de los recursos (construidos con jsonencode desde variables en
+# iam_policies.tf), sin necesidad de crear recursos reales.
 
 mock_provider "aws" {}
 mock_provider "aws" { alias = "networking" }
@@ -444,11 +443,12 @@ variables {
   data_classification     = "internal"
 }
 
-# ─── Helpers: las tres políticas como locals evaluables en plan ───────────────
-# (definidos en iam_policies.tf; referenciables directamente en assert)
-#   local.github_plan_policy_json   → JSON de la política de github-terraform-plan
-#   local.github_apply_policy_json  → JSON de la política de github-terraform-apply
-#   local.bucket_policy_json        → JSON de la política del bucket S3
+# ─── Las tres políticas se leen desde los recursos que las consumen ──────────
+# (los run blocks no acceden a locals; el valor es conocido en plan porque
+#  los locals de iam_policies.tf dependen solo de variables)
+#   aws_iam_policy.github_plan.policy      → política de github-terraform-plan
+#   aws_iam_policy.github_apply.policy     → política de github-terraform-apply
+#   aws_s3_bucket_policy.tfstate.policy    → política del bucket S3
 
 # ─── P-IAM-01: github-terraform-plan no tiene acciones de escritura ───────────
 # (excepto sobre recursos cuyo ARN termina en ".tflock")
@@ -457,7 +457,7 @@ run "p_iam_01_plan_role_no_write_actions" {
 
   assert {
     condition = !anytrue(flatten([
-      for stmt in jsondecode(local.github_plan_policy_json).Statement : [
+      for stmt in jsondecode(aws_iam_policy.github_plan.policy).Statement : [
         for action in flatten([tolist(try(tolist(stmt.Action), [stmt.Action]))]) :
         (
           can(regex(":(Create|Put|Delete|Update|Attach|Detach)", action))
@@ -479,7 +479,7 @@ run "p_iam_02_apply_role_no_workload_perms" {
 
   assert {
     condition = !anytrue(flatten([
-      for stmt in jsondecode(local.github_apply_policy_json).Statement : [
+      for stmt in jsondecode(aws_iam_policy.github_apply.policy).Statement : [
         for action in flatten([tolist(try(tolist(stmt.Action), [stmt.Action]))]) :
         can(regex("^(ec2|ecs|rds|elasticloadbalancing|route53|bedrock|dynamodb|iam):", action))
       ]
@@ -494,7 +494,7 @@ run "p_iam_03_plan_role_assumes_only_plan_roles" {
 
   assert {
     condition = alltrue(flatten([
-      for stmt in jsondecode(local.github_plan_policy_json).Statement : [
+      for stmt in jsondecode(aws_iam_policy.github_plan.policy).Statement : [
         for action in flatten([tolist(try(tolist(stmt.Action), [stmt.Action]))]) :
         action != "sts:AssumeRole" ? true :
         alltrue([
@@ -513,7 +513,7 @@ run "p_iam_04_apply_role_assumes_only_deploy_roles" {
 
   assert {
     condition = alltrue(flatten([
-      for stmt in jsondecode(local.github_apply_policy_json).Statement : [
+      for stmt in jsondecode(aws_iam_policy.github_apply.policy).Statement : [
         for action in flatten([tolist(try(tolist(stmt.Action), [stmt.Action]))]) :
         action != "sts:AssumeRole" ? true :
         alltrue([
@@ -532,7 +532,7 @@ run "p_s3_02_tls_enforced" {
 
   assert {
     condition = anytrue([
-      for stmt in jsondecode(local.bucket_policy_json).Statement :
+      for stmt in jsondecode(aws_s3_bucket_policy.tfstate.policy).Statement :
       stmt.Effect == "Deny" &&
       try(stmt.Condition.Bool["aws:SecureTransport"] == "false", false)
     ])
@@ -701,6 +701,7 @@ skip-check:
   - CKV_AWS_18   # Logging de acceso en bucket S3: se delega a CloudTrail (spec: operations-dr)
 ```
 
+`CKV2_AWS_64` no se omite de forma global: se omite solo en `infra/modules/kms/main.tf` con un comentario inline dentro del recurso `aws_kms_key.this` (`#checkov:skip=CKV2_AWS_64:la política de clave la aporta quien invoca el módulo`), de modo que el resto del código sigue sujeto al check.
 Cada excepción debe justificarse con un comentario en la misma línea; el archivo final puede ampliar esta lista cuando se implementen los módulos de specs posteriores.
 
 #### 4.3 `.pre-commit-config.yaml`
@@ -849,7 +850,7 @@ Ubicados en `infra/modules/kms/tests/kms_test.tftest.hcl`. Verifican:
 - **Ruta positiva (`run "valid_key"`)**: con entradas válidas, los recursos planificados tienen los atributos correctos (`enable_key_rotation`, `deletion_window_in_days`, prefijo `alias/`).
 - **Ruta negativa (`run "invalid_window"`)**: con entrada inválida, la validación de la variable produce el error esperado antes de que se genere ningún plan.
 
-Los asserts del test de bootstrap referencian `local.github_plan_policy_json`, `local.github_apply_policy_json` y `local.bucket_policy_json` directamente (sin outputs intermedios). Esto es válido según la documentación oficial de Terraform: los asserts pueden referenciar cualquier named value disponible en la configuración principal, incluyendo locals que son evaluables en plan.
+Los asserts del test de bootstrap leen las políticas desde `aws_iam_policy.github_plan.policy`, `aws_iam_policy.github_apply.policy` y `aws_s3_bucket_policy.tfstate.policy`, porque los bloques `run` no acceden a locals. Siguen siendo conocidas en plan: los locals que las construyen se derivan solo de variables y `jsonencode`, sin atributos computados del provider.
 
 ### Validación estructural con `terraform validate`
 
@@ -976,10 +977,10 @@ Las siguientes propiedades son verificables mediante `terraform test` con `mock_
 | P-S3-02 | `s3_tls_enforced` | `terraform test` (`run "p_s3_02_tls_enforced"` en `bootstrap_test.tftest.hcl`) + revisión de código. |
 | P-S3-03 | `s3_versioning_enabled` | Revisión de código: `aws_s3_bucket_versioning` con `status = "Enabled"`. |
 | P-IAM-01 | `plan_role_no_write_actions` | `terraform test` (`run "p_iam_01_plan_role_no_write_actions"`). |
-| P-IAM-02 | `apply_role_no_workload_perms` | `terraform test` (`run "p_iam_02_apply_role_no_workload_perms"`): ninguna acción en `github_apply_policy_json` empieza por `ec2:`, `ecs:`, `rds:`, `elasticloadbalancing:`, `route53:`, `bedrock:`, `dynamodb:` o `iam:`. |
+| P-IAM-02 | `apply_role_no_workload_perms` | `terraform test` (`run "p_iam_02_apply_role_no_workload_perms"`): ninguna acción en `aws_iam_policy.github_apply.policy` empieza por `ec2:`, `ecs:`, `rds:`, `elasticloadbalancing:`, `route53:`, `bedrock:`, `dynamodb:` o `iam:`. |
 | P-IAM-03 | `plan_role_assumes_only_plan_roles` | `terraform test` (`run "p_iam_03_plan_role_assumes_only_plan_roles"`). |
 | P-IAM-04 | `apply_role_assumes_only_deploy_roles` | `terraform test` (`run "p_iam_04_apply_role_assumes_only_deploy_roles"`). |
 
 **Validates: Requirements 2, 3, 4, 5, 12**
 
-> Los IDs de cuenta usados en los tests son ficticios (formato `111111111111`..`666666666666`). El `mock_provider` evita llamadas reales a AWS; los asserts se evalúan sobre los `locals` de política (valores HCL puros) mediante `jsondecode`.
+> Los IDs de cuenta usados en los tests son ficticios (formato `111111111111`..`666666666666`). El `mock_provider` evita llamadas reales a AWS; los asserts se evalúan mediante `jsondecode` sobre el atributo `policy` de los recursos (valores conocidos en plan).

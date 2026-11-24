@@ -14,3 +14,12 @@ terraform.rc
 .infracost/
 # SO
 .DS_Store
+
+# Terraform (foundation)
+.terraform/
+*.tfstate.backup
+*.tflock
+*.auto.tfvars
+
+# checkov output
+.checkov-results
